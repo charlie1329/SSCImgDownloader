@@ -91,7 +91,7 @@ public class DownloadImage implements Runnable
 				public void run()
 				{
 					statusPanel.removeAll();
-					ImageIcon icon = new ImageIcon("jar_and_icons/tick.png");//getting image
+					ImageIcon icon = new ImageIcon("stuff/tick.png");//getting image
 					JLabel tick = new JLabel(icon);
 					statusPanel.add(tick);//add to panel
 				}
