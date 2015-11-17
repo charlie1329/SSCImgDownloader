@@ -60,7 +60,7 @@ public class MainPanel extends JPanel
 		
 		this.addressEntry = new JTextField(14);//setting up text fields
 		this.poolNumber = new JTextField(2);
-		this.folderPath = new JTextField(14);
+		this.folderPath = new JTextField(15);
 		this.folderPath.setEditable(false);//dont want this one editable
 		
 		ImageIcon folder = new ImageIcon("directory.png");//creating image icons
@@ -76,6 +76,7 @@ public class MainPanel extends JPanel
 		
 		this.model = new DefaultTableModel();//model for the table (setting up the table)
 		this.table = new JTable(this.model);
+		this.table.getTableHeader().setReorderingAllowed(false);//stop column switching
 		this.model.addColumn("File Name");//setting the column names
 		this.model.addColumn("Size");
 		this.model.addColumn("Download Status");
