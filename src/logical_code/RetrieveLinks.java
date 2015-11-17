@@ -73,7 +73,7 @@ public class RetrieveLinks
 		{
 			String current = img.attr("src");
 			
-			if(current.indexOf(this.webPage) == -1)//i.e not fully qualified
+			if(current.indexOf("http://") == -1)//i.e not fully qualified if it has http:// it is a valid web address
 			{
 				current = this.webPage + current;
 			}
