@@ -34,7 +34,7 @@ public class CreateDownloaderFrame
 		
 		//this.panel = new DownloadPanel();//adding panel to frame
 		//this.frame.add(this.panel);
-		
+		this.frame.setResizable(false);
 		this.frame.setLocationRelativeTo(null);//centering on screen
 		this.frame.setVisible(true);//displaying frame
 	}
