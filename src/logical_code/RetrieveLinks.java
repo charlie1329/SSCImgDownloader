@@ -59,14 +59,32 @@ public class RetrieveLinks
 	 */
 	private ArrayList<String> connectAndGetLinks() throws IOException
 	{
-		ArrayList<String> linkStrings = new ArrayList<String>();
 		
 		Document selectedWebPage = Jsoup.connect(this.webPage).get();//getting the document
 		
 		String filter = this.filter.getRegexExtensions();//getting user defined filters
 		
-		String fullSelector = "img[src~=(?i)\\." + filter + "]";//full selector for document
+		ArrayList<String> images = getLinks("img","src",filter,selectedWebPage);//getting images
+		ArrayList<String> other = getLinks("a","href",filter,selectedWebPage);//getting all other files
 		
+		images.addAll(other);//appending lists
+		
+		return images;
+	}
+	
+	/**this method will get the links in the web page based upon a tag and attribute
+	 * 
+	 * @param tag the html tag to look for
+	 * @param attr the attribute within said tag
+	 * @param filter the filter statement set by the user
+	 * @param selectedWebPage the webpage to search
+	 * @return the array list of links
+	 */
+	private ArrayList<String> getLinks(String tag, String attr, String filter, Document selectedWebPage)
+	{
+		ArrayList<String> myLinks = new ArrayList<String>();
+		
+		String fullSelector = tag+"["+attr+"~=(?i)\\." + filter + "]";
 		Elements allLinks = selectedWebPage.select(fullSelector);//getting all links
 		
 		for(Element img : allLinks)//going through all links
@@ -78,10 +96,11 @@ public class RetrieveLinks
 				current = this.webPage + current;
 			}
 			
-			linkStrings.add(current);
+			myLinks.add(current);
+			//at this stage here add the thing to the table
 		}
 		
-		return linkStrings;
+		return myLinks;
 	}
 	
 	/**this method returns the array list of links to download from
