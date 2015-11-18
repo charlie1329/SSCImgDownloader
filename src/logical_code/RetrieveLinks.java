@@ -3,6 +3,9 @@ package logical_code;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,9 +25,8 @@ public class RetrieveLinks
 	/**this constructor will set up all fields such that the links can be retrieved by the user
 	 * 
 	 * @param webPage the user selected web page
-	 * @throws IOException will be caught by gui if necessary
 	 */
-	public RetrieveLinks(String webPage,FileExtensionFilter filter) throws IOException
+	public RetrieveLinks(String webPage,FileExtensionFilter filter) 
 	{
 		this.webPage = setUpAddress(webPage);
 		this.filter = filter;
@@ -57,19 +59,34 @@ public class RetrieveLinks
 	 * @throws IOException will be caught by gui
 	 * @return the arraylist of links
 	 */
-	private ArrayList<String> connectAndGetLinks() throws IOException
+	private ArrayList<String> connectAndGetLinks()
 	{
+		try
+		{
+			Document selectedWebPage = Jsoup.connect(this.webPage).get();//getting the document
 		
-		Document selectedWebPage = Jsoup.connect(this.webPage).get();//getting the document
+			String filter = this.filter.getRegexExtensions();//getting user defined filters
+			ArrayList<String> images = getLinks("img","src",filter,selectedWebPage);//getting images
+			ArrayList<String> other = getLinks("a","href",filter,selectedWebPage);//getting all other files
+			images.addAll(other);//appending lists
+			System.out.println(images.size());
+			for(int i = images.size()-1; i >=0; i--)//removing any duplicates due to files and images pointing to same place
+			{
+				int firstIndex = images.indexOf(images.get(i));//last index of item
+				if(firstIndex < i)//ie if another version
+				{
+					images.remove(i);//removing duplicate
+				}
+			}
+			System.out.println(images.size());
+			return images;
+		}
+		catch(IOException e)//if failure to connect to web page
+		{
+			JOptionPane.showMessageDialog(null,"Unable to connect to webpage: "+ this.webPage + ". Please try again");//showing problem
+			return new ArrayList<String>();//default value if something goes wrong
+		}
 		
-		String filter = this.filter.getRegexExtensions();//getting user defined filters
-		
-		ArrayList<String> images = getLinks("img","src",filter,selectedWebPage);//getting images
-		ArrayList<String> other = getLinks("a","href",filter,selectedWebPage);//getting all other files
-		
-		images.addAll(other);//appending lists
-		
-		return images;
 	}
 	
 	/**this method will get the links in the web page based upon a tag and attribute
@@ -86,12 +103,11 @@ public class RetrieveLinks
 		
 		String fullSelector = tag+"["+attr+"~=(?i)\\." + filter + "]";
 		Elements allLinks = selectedWebPage.select(fullSelector);//getting all links
-		
 		for(Element img : allLinks)//going through all links
 		{
-			String current = img.attr("src");
+			String current = img.attr(attr);
 			
-			if(current.indexOf("http://") == -1)//i.e not fully qualified if it has http:// it is a valid web address
+			if(current.indexOf("http://") == -1 && current.indexOf("https://") == -1)//i.e not fully qualified if it has http:// it is a valid web address
 			{
 				current = this.webPage + current;
 			}

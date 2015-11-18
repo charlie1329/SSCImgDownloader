@@ -20,6 +20,22 @@ public class FileExtensionFilter
 		this.extensions = new ArrayList<String>();
 	}
 	
+	/**different constructor which automatically sets the extensions up on creation
+	 * 
+	 * @param extensions the list of file extensions
+	 */
+	public FileExtensionFilter(ArrayList<String> extensions)
+	{
+		this.extensions = extensions;
+		for(int i = this.extensions.size()-1; i >= 0; i--)//getting rid of weird null values
+		{
+			if(this.extensions.get(i) == null)
+			{
+				this.extensions.remove(i);
+			}
+		}
+	}
+	
 	/**this method simply adds a new file extension to the array list
 	 * 
 	 * @param newExtension the new file extension to be allowed
@@ -27,6 +43,15 @@ public class FileExtensionFilter
 	public void addExtension(String newExtension)
 	{
 		this.extensions.add(newExtension);
+	}
+	
+	/**this method will set the array list as the one passed in
+	 * 
+	 * @param allExtensions the new array list
+	 */
+	public void addAll(ArrayList<String> allExtensions)
+	{
+		this.extensions = allExtensions;
 	}
 	
 	/**this method is a wrapper for get in the array list class
@@ -46,13 +71,15 @@ public class FileExtensionFilter
 	public String getRegexExtensions()
 	{
 		String expression = "";//where result is stored
-		
 		for(int i = 0; i < this.extensions.size()-1; i++)//looping round all but last element
 		{
 			expression += this.getExtension(i) + "|";// | means or in this context
 		}
 		
-		expression += this.getExtension(this.extensions.size()-1);//adding final item, just without the | included
+		if(this.extensions.size() != 0)//index out of bounds if empty list!
+		{
+			expression += this.getExtension(this.extensions.size()-1);//adding final item, just without the | included
+		}
 		
 		expression = "(" +expression + ")";//need to add parentheses for final result
 		

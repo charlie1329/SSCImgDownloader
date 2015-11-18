@@ -22,9 +22,10 @@ public class DownloadImage implements Runnable
 {
 	private JPanel statusPanel;//the panel with the status on it
 	private String fileLink;
-	private long fileSize;
+	private int fileSize;
 	private JProgressBar progress;
 	private String folder;
+	private final boolean knownFileSize;
 	/**constructor essentially initialises all attributes
 	 * 
 	 * @param status the panel displaying the download status
@@ -32,14 +33,24 @@ public class DownloadImage implements Runnable
 	 * @param fileSize the size of the file being downloaded
 	 * @param folder the location to store the file
 	 */
-	public DownloadImage(JPanel status, String fileLink,String folder, long fileSize)
+	public DownloadImage(JPanel status, String fileLink,String folder, int fileSize)
 	{
 		this.statusPanel = status;//now I have control of the panel and what goes inside it
 		this.fileLink = fileLink;
 		this.fileSize = fileSize;
-		this.folder = folder + this.fileLink.substring(this.fileLink.lastIndexOf("/")+1, this.fileLink.length());//getting store location
+		this.folder = folder + "\\" + this.fileLink.substring(this.fileLink.lastIndexOf("/")+1, this.fileLink.length());//getting store location
 		
-		this.progress = new JProgressBar(0,(int)this.fileSize);//the progress bar
+		if(fileSize == 0 || fileSize == -1)//accounting for file size unknown
+		{
+			this.knownFileSize = false;
+			this.progress = new JProgressBar(0,100);//won't increment the progress bar since no file size knows
+			this.progress.setString("Downloading");
+		}
+		else
+		{
+			this.knownFileSize = true;
+			this.progress = new JProgressBar(0,(int)this.fileSize);//the progress bar
+		}
 	}
 	
 	/**the method that runs everything, it will write the bytes of the image
@@ -64,10 +75,8 @@ public class DownloadImage implements Runnable
 		{
 			
 			URL url = new URL(this.fileLink);//converting to url
-			
 			in = url.openStream();
 			out = new BufferedOutputStream(new FileOutputStream(this.folder));//setting up streams
-			
 			//starting to write to file
 			int buffer = in.read();
 			
@@ -80,18 +89,21 @@ public class DownloadImage implements Runnable
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run()
 					{
-						int currentProgress = progress.getValue();//getting current value
-						progress.setValue(currentProgress+1);//incrementing it
+						if(knownFileSize)
+						{
+							int currentProgress = progress.getValue();//getting current value
+							progress.setValue(currentProgress+1);//incrementing it
+						}
 					}
 				});
 			}
 			
-			//finally I want to get rid of the progress bar and set it to the tick picture sice completed
+			//finally I want to get rid of the progress bar and set it to the tick picture since completed
 			SwingUtilities.invokeLater(new Runnable(){
 				public void run()
 				{
 					statusPanel.removeAll();
-					ImageIcon icon = new ImageIcon("stuff/tick.png");//getting image
+					ImageIcon icon = new ImageIcon("tick.png");//getting image
 					JLabel tick = new JLabel(icon);
 					statusPanel.add(tick);//add to panel
 				}
@@ -100,8 +112,17 @@ public class DownloadImage implements Runnable
 		}
 		catch(IOException e)//if it all goes wrong
 		{
-			JOptionPane.showMessageDialog(this.statusPanel.getParent(), "Can't retreive image at: " + this.fileLink,
-					"Can't get image",JOptionPane.ERROR_MESSAGE);//displaying faulty link
+			return;//fix
+			/*SwingUtilities.invokeLater(new Runnable(){//if failure to download
+				public void run()
+				{
+					statusPanel.removeAll();
+					ImageIcon cross = new ImageIcon("cross.png");
+					JLabel crossLabel = new JLabel(cross);
+					statusPanel.add(crossLabel);
+				}
+			});
+			return;*/
 		}
 		finally//closing streams
 		{
