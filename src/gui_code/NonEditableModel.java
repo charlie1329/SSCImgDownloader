@@ -9,6 +9,9 @@ import javax.swing.table.DefaultTableModel;
  */
 public class NonEditableModel extends DefaultTableModel
 {
+	
+	private static final long serialVersionUID = 1L;//default value
+
 	/**regardless return false as I don't want editable cells
 	 * @param row the table row
 	 * @param column the table column

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

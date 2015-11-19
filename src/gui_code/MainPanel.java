@@ -1,15 +1,8 @@
 package gui_code;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+
 import java.awt.FlowLayout;
-
-
-
-
-
-
-
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,6 +32,9 @@ import logical_code.RetrieveLinks;
  */
 public class MainPanel extends JPanel
 {
+	
+	private static final long serialVersionUID = 1L;//default value
+	
 	private JLabel addressLabel;
 	private JTextField addressEntry;
 	private JLabel folderDisplay;
@@ -242,7 +238,7 @@ public class MainPanel extends JPanel
 	 */
 	private ArrayList<String> getExtensions()
 	{
-		ArrayList<String> extension = new ArrayList<String>();//arraylist to store extensions
+		ArrayList<String> extension = new ArrayList<String>();//array list to store extensions
 		
 		int count = this.extensionEntry.getComponentCount();//number of components
 		

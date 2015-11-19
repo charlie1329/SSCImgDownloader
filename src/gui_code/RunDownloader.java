@@ -19,6 +19,7 @@ public class RunDownloader
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run()
 			{
+				@SuppressWarnings("unused")//frame created when constructor called so the object is used hence the suppression
 				CreateDownloaderFrame download = new CreateDownloaderFrame();//adding to event queue
 			}
 		});

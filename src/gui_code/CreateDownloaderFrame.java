@@ -1,6 +1,5 @@
 package gui_code;
 
-
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -13,6 +12,8 @@ import javax.swing.UIManager.LookAndFeelInfo;
  */
 public class CreateDownloaderFrame extends JFrame
 {
+	
+	private static final long serialVersionUID = 1L;//default value
 	private MainPanel panel;
 	
 	public CreateDownloaderFrame()
@@ -20,6 +21,7 @@ public class CreateDownloaderFrame extends JFrame
 		super("Image Downloader");//setting standard properties
 		setSize(600,400);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		//setting to nimbus look and feel
 		try {
 		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
