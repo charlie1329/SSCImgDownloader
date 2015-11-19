@@ -21,16 +21,18 @@ public class RetrieveLinks
 	private String webPage;
 	private FileExtensionFilter filter;
 	private ArrayList<String> links;//will be filled by time methods have been run
+	private PoolDownloader pool;
 	
 	/**this constructor will set up all fields such that the links can be retrieved by the user
 	 * 
 	 * @param webPage the user selected web page
 	 */
-	public RetrieveLinks(String webPage,FileExtensionFilter filter) 
+	public RetrieveLinks(String webPage,FileExtensionFilter filter,PoolDownloader pool) 
 	{
 		this.webPage = setUpAddress(webPage);
 		this.filter = filter;
-		this.links = connectAndGetLinks();
+		this.links = new ArrayList<String>();
+		this.pool = pool;//allowing me to add to pool here
 	}
 	
 	/**this method sets up the web address into the correct format for use
@@ -56,35 +58,22 @@ public class RetrieveLinks
 	
 	/**this method will connect to the web page and get the associated html document
 	 * it will then proceed to get the links in the form of an arraylist of strings
-	 * @throws IOException will be caught by gui
-	 * @return the arraylist of links
 	 */
-	private ArrayList<String> connectAndGetLinks()
+	public void connectAndGetLinks()
 	{
 		try
 		{
 			Document selectedWebPage = Jsoup.connect(this.webPage).get();//getting the document
 		
 			String filter = this.filter.getRegexExtensions();//getting user defined filters
-			ArrayList<String> images = getLinks("img","src",filter,selectedWebPage);//getting images
-			ArrayList<String> other = getLinks("a","href",filter,selectedWebPage);//getting all other files
-			images.addAll(other);//appending lists
-			System.out.println(images.size());
-			for(int i = images.size()-1; i >=0; i--)//removing any duplicates due to files and images pointing to same place
-			{
-				int firstIndex = images.indexOf(images.get(i));//last index of item
-				if(firstIndex < i)//ie if another version
-				{
-					images.remove(i);//removing duplicate
-				}
-			}
-			System.out.println(images.size());
-			return images;
+			getLinks("img","src",filter,selectedWebPage);//getting images
+			getLinks("a","href",filter,selectedWebPage);//getting all other files
+			
+			
 		}
 		catch(IOException e)//if failure to connect to web page
 		{
 			JOptionPane.showMessageDialog(null,"Unable to connect to webpage: "+ this.webPage + ". Please try again");//showing problem
-			return new ArrayList<String>();//default value if something goes wrong
 		}
 		
 	}
@@ -95,11 +84,9 @@ public class RetrieveLinks
 	 * @param attr the attribute within said tag
 	 * @param filter the filter statement set by the user
 	 * @param selectedWebPage the webpage to search
-	 * @return the array list of links
 	 */
-	private ArrayList<String> getLinks(String tag, String attr, String filter, Document selectedWebPage)
+	private void getLinks(String tag, String attr, String filter, Document selectedWebPage)
 	{
-		ArrayList<String> myLinks = new ArrayList<String>();
 		
 		String fullSelector = tag+"["+attr+"~=(?i)\\." + filter + "]";
 		Elements allLinks = selectedWebPage.select(fullSelector);//getting all links
@@ -109,14 +96,23 @@ public class RetrieveLinks
 			
 			if(current.indexOf("http://") == -1 && current.indexOf("https://") == -1)//i.e not fully qualified if it has http:// it is a valid web address
 			{
-				current = this.webPage + current;
+				if(this.webPage.charAt(this.webPage.length()-1) != '/' && current.charAt(0) != '/')//if no separator
+				{
+					current = this.webPage + "/" +  current;
+				}
+				else
+				{
+					current = this.webPage + current;
+				}
 			}
 			
-			myLinks.add(current);
-			//at this stage here add the thing to the table
+			if(!this.links.contains(current))//i.e no duplicates
+			{
+				this.links.add(current);
+				this.pool.startDownload(current);//starting download once link retreived
+			}
 		}
 		
-		return myLinks;
 	}
 	
 	/**this method returns the array list of links to download from

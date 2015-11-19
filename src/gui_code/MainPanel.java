@@ -202,7 +202,7 @@ public class MainPanel extends JPanel
 		ArrayList<String> extensions = this.getExtensions();
 		String threads = this.poolNumber.getText();
 		
-		int realThreads = 0;
+		final int realThreads;
 		try//try and cast threads to an int as necessary
 		{
 			realThreads = Integer.parseInt(threads);
@@ -214,9 +214,19 @@ public class MainPanel extends JPanel
 			}
 			else
 			{
-				FileExtensionFilter filter = new FileExtensionFilter(extensions);//setting up filter
-				RetrieveLinks retriever = new RetrieveLinks(webAddress,filter);//setting up retriever
-				PoolDownloader pool = new PoolDownloader(retriever,realThreads,this.model,folder);//setting up pool
+				Runnable backgroundDownload = new Runnable(){//creating a runnable for the worker thread about to be started
+					public void run()
+					{
+						FileExtensionFilter filter = new FileExtensionFilter(extensions);//setting up filter
+						PoolDownloader pool = new PoolDownloader(realThreads,model,folder);//setting up pool
+						RetrieveLinks retriever = new RetrieveLinks(webAddress,filter,pool);//setting up retriever
+						retriever.connectAndGetLinks();//starting the download process
+						pool.shutDown();//shutdown after completion
+					}	
+				};
+				
+				Thread worker = new Thread(backgroundDownload);//worker thread for downloads
+				worker.start();//starting my worker thread
 			}
 		}
 		catch(ClassCastException e)//if threads not an integer

@@ -11,7 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 
 /**this class implements Runnable and it will represent the downloading of a single image
  * to be run in a thread pool
@@ -26,6 +28,7 @@ public class DownloadImage implements Runnable
 	private JProgressBar progress;
 	private String folder;
 	private final boolean knownFileSize;
+	private DefaultTableModel tableModel;
 	/**constructor essentially initialises all attributes
 	 * 
 	 * @param status the panel displaying the download status
@@ -33,12 +36,13 @@ public class DownloadImage implements Runnable
 	 * @param fileSize the size of the file being downloaded
 	 * @param folder the location to store the file
 	 */
-	public DownloadImage(JPanel status, String fileLink,String folder, int fileSize)
+	public DownloadImage(DefaultTableModel tableModel, JPanel status, String fileLink,String folder, int fileSize)
 	{
 		this.statusPanel = status;//now I have control of the panel and what goes inside it
 		this.fileLink = fileLink;
 		this.fileSize = fileSize;
 		this.folder = folder + "\\" + this.fileLink.substring(this.fileLink.lastIndexOf("/")+1, this.fileLink.length());//getting store location
+		this.tableModel = tableModel;
 		
 		if(fileSize == 0 || fileSize == -1)//accounting for file size unknown
 		{
@@ -68,6 +72,9 @@ public class DownloadImage implements Runnable
 			{
 				statusPanel.removeAll();//remove image
 				statusPanel.add(progress);//add the progress bar
+				statusPanel.repaint();
+				statusPanel.revalidate();
+				tableModel.fireTableDataChanged();
 			}
 		});
 		
@@ -93,6 +100,9 @@ public class DownloadImage implements Runnable
 						{
 							int currentProgress = progress.getValue();//getting current value
 							progress.setValue(currentProgress+1);//incrementing it
+							statusPanel.repaint();
+							statusPanel.revalidate();
+							tableModel.fireTableDataChanged();
 						}
 					}
 				});
@@ -106,6 +116,9 @@ public class DownloadImage implements Runnable
 					ImageIcon icon = new ImageIcon("tick.png");//getting image
 					JLabel tick = new JLabel(icon);
 					statusPanel.add(tick);//add to panel
+					statusPanel.repaint();
+					statusPanel.revalidate();
+					tableModel.fireTableDataChanged();
 				}
 			});
 			
