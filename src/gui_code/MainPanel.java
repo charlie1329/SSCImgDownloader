@@ -35,6 +35,8 @@ public class MainPanel extends JPanel
 	
 	private static final long serialVersionUID = 1L;//default value
 	
+	public static Integer NumberDownloaded;//used to define when the screen can be cleared
+	
 	private JLabel addressLabel;
 	private JTextField addressEntry;
 	private JLabel folderDisplay;
@@ -58,6 +60,9 @@ public class MainPanel extends JPanel
 	public MainPanel()
 	{
 		super();
+	
+		NumberDownloaded = 0;
+		
 		
 		initialiseComponents();//initialising attributes
 		positionComponents();//positioning
@@ -88,7 +93,7 @@ public class MainPanel extends JPanel
 		this.selectFolder = new JButton(folder);//setting up buttons (with and without icons)
 		this.addExtension = new JButton("+");
 		this.download = new JButton(down);
-		this.clear = new JButton("Clear Screen");
+		this.clear = new JButton("Clear All");
 		
 		this.extensionEntry = new JComboBox<String>();//setting up combo box for file extensions
 		this.extensionEntry.setEditable(true);//allowing editing to be done
@@ -180,9 +185,10 @@ public class MainPanel extends JPanel
 			public void run()
 			{
 				String entered = extensionEntry.getSelectedItem().toString();//getting already entered term
-				if(entered != null && !getExtensions().contains(entered))//ie new extension added
+				if(entered != null && !getExtensions().contains(entered) && !entered.equals(""))//ie new extension added
 				{
 					extensionEntry.addItem(entered);//adding to displayed extensions
+					extensionEntry.getEditor().setItem("");//resetting after adding
 				}
 			}
 		});
@@ -250,6 +256,34 @@ public class MainPanel extends JPanel
 		return extension;
 	}
 	
+	/**this method will clear all user input as well as the downloads (from display)
+	 * it will only clear the downloads if the system is currently not downloading any files
+	 */
+	private void clearAll()
+	{
+		SwingUtilities.invokeLater(new Runnable(){//updating the gui so need to invoke later
+			public void run()
+			{
+				addressEntry.setText("");//wiping all entry fields
+				folderPath.setText("");
+				poolNumber.setText("");
+				
+				extensionEntry.removeAllItems();//wiping extensions field
+				extensionEntry.getEditor().setItem("");
+				
+				if(NumberDownloaded == model.getRowCount())//i.e nothing currently downloading
+				{
+					model.setRowCount(0);//wiping the table
+					
+					synchronized(NumberDownloaded)//preventing thread interference with this object
+					{
+						NumberDownloaded = 0;//resetting again
+					}
+				}
+			}
+		});
+	}
+	
 	/**this method adds all the necessary listeners to my interface
 	 * 
 	 */
@@ -258,6 +292,7 @@ public class MainPanel extends JPanel
 		this.selectFolder.addActionListener(e -> selectFolder());//adding folder listener
 		this.addExtension.addActionListener(e -> addExtension());//adding file extension
 		this.download.addActionListener(e -> attemptDownload());//for downloading
+		this.clear.addActionListener(e -> clearAll());//for wiping the screen
 	}
 	
 }

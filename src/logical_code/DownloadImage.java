@@ -1,5 +1,7 @@
 package logical_code;
 
+import gui_code.MainPanel;
+
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -123,8 +125,9 @@ public class DownloadImage implements Runnable
 		}
 		catch(IOException e)//if it all goes wrong
 		{
-			return;//fix
-			/*SwingUtilities.invokeLater(new Runnable(){//if failure to download
+			//the main cause of an error in this case would be if there is a link on the web page which is wrapped in something
+			//meaning you can't really retrieve it; therefore it shouldn't be downloaded hence the error checking
+			SwingUtilities.invokeLater(new Runnable(){//if failure to download, notify user by failed icon
 				public void run()
 				{
 					statusPanel.removeAll();
@@ -133,15 +136,21 @@ public class DownloadImage implements Runnable
 					statusPanel.add(crossLabel);
 				}
 			});
-			return;*/
+			return;
 		}
 		finally//closing streams
 		{
 			try//try to close
 			{
+				synchronized(MainPanel.NumberDownloaded)//potential for multiple threads to access this at same time so want to be careful
+				{
+					MainPanel.NumberDownloaded ++;//incrementing number counted
+				}
+				
 				in.close();
-				out.close();
-			} catch (IOException e)
+				out.close();	
+			}
+			catch (IOException e)
 			{
 				//nothing can be done in this situation so just ignore and move on
 			}
