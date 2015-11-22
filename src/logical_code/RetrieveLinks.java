@@ -99,10 +99,19 @@ public class RetrieveLinks
 				{
 					current = this.webPage + "/" +  current;
 				}
+				else if(current.indexOf("//") == 0)//some weird errors with stuff
+				{
+					current = "http:" + current;
+				}
 				else
 				{
 					current = this.webPage + current;
 				}
+			}
+			
+			if(current.contains("?"))//dealing with odd urls
+			{
+				current = current.substring(0,current.indexOf("?"));
 			}
 			
 			if(!this.links.contains(current))//i.e no duplicates

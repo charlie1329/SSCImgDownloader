@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -42,6 +43,13 @@ public class DownloadImage implements Runnable
 		this.fileLink = fileLink;
 		this.fileSize = fileSize;
 		this.folder = folder + "\\" + this.fileLink.substring(this.fileLink.lastIndexOf("/")+1, this.fileLink.length());//getting store location
+		
+		if(this.folder.contains("?"))//question marks mess with file directories
+		{
+			int occur = this.folder.indexOf("?");
+			this.folder = this.folder.substring(0,occur) + this.folder.substring(occur+1);
+		}
+		
 		this.tableModel = tableModel;
 		
 		if(fileSize == 0 || fileSize == -1)//accounting for file size unknown
@@ -80,7 +88,6 @@ public class DownloadImage implements Runnable
 		
 		try//try to get image
 		{
-			
 			URL url = new URL(this.fileLink);//converting to url
 			in = url.openStream();
 			out = new BufferedOutputStream(new FileOutputStream(this.folder));//setting up streams
